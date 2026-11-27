@@ -25,7 +25,8 @@ window.EcoApi = (() => {
     catch (e) { throw new ApiError('network', 0); }
     let j = null; try { j = await r.json(); } catch (e) { j = null; }
     if (r.ok) return j;
-    const code = (j && (j.error_code || j.error || j.message || j.msg)) || 'generic';
+    // رفض خطّاف التسجيل يصل برمز unknown ورسالته في msg (مثل signup_disabled)
+    const code = (j && ((j.error_code !== 'unknown' && j.error_code) || j.error || j.message || j.msg)) || 'generic';
     throw new ApiError(String(code), r.status);
   }
   function setSession(j) {
