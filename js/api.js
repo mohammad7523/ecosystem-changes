@@ -42,12 +42,14 @@ window.EcoApi = (() => {
   return {
     enabled, ApiError, okUser, strong,
     signedIn: () => !!sess,
-    async signUp(username, password, displayName, consent) {
+    // demo = { role: 'student' | 'teacher' } في الوضع التجريبي: إقرار بأن الحساب تجريبي بدل موافقة وليّ الأمر
+    async signUp(username, password, displayName, consent, demo = null) {
       if (!okUser(username)) throw new ApiError('invalid_username', 0);
       if (!strong(password)) throw new ApiError('weak_password', 0);
-      if (!consent) throw new ApiError('consent_required', 0);
-      const j = await req('/auth/v1/signup', { auth: false, body: { email: email(username), password,
-        data: { display_name: String(displayName || '').trim().slice(0, 30), guardian_consent: true, policy: (window.CONTENT && window.CONTENT.privacy.policyVersion) || '2.0' } } });
+      if (!consent) throw new ApiError(demo ? 'demo_ack_required' : 'consent_required', 0);
+      const meta = { display_name: String(displayName || '').trim().slice(0, 30), policy: (window.CONTENT && window.CONTENT.privacy.policyVersion) || '2.0' };
+      if (demo) { meta.demo_ack = true; meta.role_request = demo.role === 'teacher' ? 'teacher' : 'student'; } else meta.guardian_consent = true;
+      const j = await req('/auth/v1/signup', { auth: false, body: { email: email(username), password, data: meta } });
       setSession(j);
     },
     async signIn(username, password) {

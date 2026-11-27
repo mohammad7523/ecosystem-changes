@@ -30,18 +30,29 @@
     const p = input('sp', 'password', { autocomplete: 'new-password', 'aria-describedby': 'sp-h', maxlength: 72 });
     const p2 = input('sp2', 'password', { autocomplete: 'new-password', maxlength: 72 });
     const c = el('input', { type: 'checkbox', id: 'sc' });
+    const cText = el('span', { text: T.consent });
     const m = el('p', { class: 'p-msg', hidden: true, role: 'alert' });
     const b = el('button', { type: 'submit', class: 'btn primary', text: T.signupBtn });
-    const f = el('form', { novalidate: true }, field('su', T.username, u, T.usernameHint), field('sd', T.displayName, d, T.displayHint),
+    // الوضع التجريبي (يحدده الخادم): ملاحظة، واختيار الدور طالب أو معلم، وإقرار بأن الحساب تجريبي
+    const D = T.demo; let demo = false;
+    const rS = el('input', { type: 'radio', name: 'srole', id: 'sr-s', value: 'student', checked: true });
+    const rT = el('input', { type: 'radio', name: 'srole', id: 'sr-t', value: 'teacher' });
+    const demoBox = el('div', { hidden: true },
+      el('p', { class: 'p-msg ok', role: 'note', text: D.banner }),
+      el('fieldset', { class: 'fb-kinds' }, el('legend', { text: D.roleLabel }),
+        el('label', { class: 'check-row', for: 'sr-s' }, rS, el('span', { text: D.roleStudent })),
+        el('label', { class: 'check-row', for: 'sr-t' }, rT, el('span', { text: D.roleTeacher }))));
+    const f = el('form', { novalidate: true }, demoBox, field('su', T.username, u, T.usernameHint), field('sd', T.displayName, d, T.displayHint),
       field('sp', T.password, p, T.passwordHint), field('sp2', T.password2, p2),
-      el('label', { class: 'check-row', for: 'sc' }, c, el('span', { text: T.consent })), m, b);
+      el('label', { class: 'check-row', for: 'sc' }, c, cText), m, b);
+    API.rpc('rpc_signup_mode').then(r => { if (r && r.demo) { demo = true; demoBox.hidden = false; cText.textContent = D.ack; } }).catch(() => { /* الوضع العادي */ });
     f.addEventListener('submit', ev => { ev.preventDefault();
       if (!API.okUser(u.value)) return msg(m, T.errors.invalid_username);
       if (!API.strong(p.value)) return msg(m, T.errors.weak_password);
       if (p.value !== p2.value) return msg(m, T.errors.mismatch);
-      if (!c.checked) return msg(m, T.consentNeeded);
+      if (!c.checked) return msg(m, demo ? D.ackNeeded : T.consentNeeded);
       busy(b, async () => {
-        try { await API.signUp(u.value, p.value, d.value || u.value, true); p.value = p2.value = ''; const code = await API.rpc('rpc_new_recovery_code'); await home(code.code); }
+        try { await API.signUp(u.value, p.value, d.value || u.value, true, demo ? { role: rT.checked ? 'teacher' : 'student' } : null); p.value = p2.value = ''; const code = await API.rpc('rpc_new_recovery_code'); await home(code.code); }
         catch (e) { p.value = p2.value = ''; msg(m, errText(e)); }
       });
     });
