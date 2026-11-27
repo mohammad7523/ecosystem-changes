@@ -33,6 +33,12 @@ window.Store = (() => {
     reviewReturn: false,   // الطالب فتح شاشة من روابط المراجعة في النتيجة
     s4: null,              // الشاشة ٤: { first, improved, checks, modelShown } نص الطالب، في الجلسة فقط ولا يُنسخ إلى الجهاز
     settings: { large: false, contrast: false, muted: false, captions: true },
+    // 11.0: المستويات والعلاج والإثراء. نتيجة المستوى منفصلة عن نتيجة التقويم الأساسي
+    level: 1,              // ١ ألاحظ وأتعرف، ٢ أفسر وأربط، ٣ أتنبأ وأحل المشكلات
+    levelResults: {},      // { رقم المستوى: { score, total, answers } } المحاولة الأولى لاختبار المستوى
+    remedial: {},          // { رقم الهدف: true } اجتاز سؤال التحقق العلاجي
+    counts: { remediation: 0, enrichment: 0 },
+    errors: {},            // { معرّف النشاط: عدد الأخطاء } للتقرير فقط
   });
 
   let state = fresh();
@@ -43,7 +49,8 @@ window.Store = (() => {
     // لا جلسة حالية: نسترجع المحفوظ على الجهاز الشخصي إن وُجد ولم تنتهِ صلاحيته
     const saved = safe(() => JSON.parse(ls.get(LK)), null);
     if (saved && Date.now() - saved.ts < TTL) {
-      state = Object.assign(fresh(), { device: 'mine', save: true, done: saved.done || [], attempts: saved.attempts || {}, settings: Object.assign(fresh().settings, saved.settings) });
+      state = Object.assign(fresh(), { device: 'mine', save: true, done: saved.done || [], attempts: saved.attempts || {}, settings: Object.assign(fresh().settings, saved.settings),
+        level: [1, 2, 3].includes(saved.level) ? saved.level : 1, levelResults: saved.levelResults || {} });
       // 10.2: تنبيه محلي مرة واحدة إذا تغيّرت نسخة سياسة الخصوصية منذ آخر حفظ (لا خادم)
       if (saved.policy && saved.policy !== POLICY) state.policyNotice = true;
       // درجة المحاولة الأولى في التقويم الختامي فقط (دون الإجابات)
@@ -59,7 +66,8 @@ window.Store = (() => {
       // الحقول المسموح بها فقط؛ diag وأي نص مكتوب لا تُنسخ
       const q = state.quiz && state.quiz.attempts[0];
       ls.set(LK, JSON.stringify({ ts: Date.now(), policy: POLICY, done: state.done, attempts: state.attempts, settings: state.settings,
-        quizFirstScore: q && q.finished ? q.score : undefined, quizBadge: state.quiz && state.quiz.badge ? true : undefined }));
+        quizFirstScore: q && q.finished ? q.score : undefined, quizBadge: state.quiz && state.quiz.badge ? true : undefined,
+        level: state.level, levelResults: Object.keys(state.levelResults || {}).length ? Object.fromEntries(Object.entries(state.levelResults).map(([k, v]) => [k, { score: v.score, total: v.total }])) : undefined }));
     }
   }
 
@@ -79,6 +87,6 @@ window.Store = (() => {
     // مسح البيانات («مسح بيانات الجلسة» و«امسح تقدمي»): يُمحى كل شيء من ذاكرة الجلسة ومن الجهاز
     clearAll() { ss.del(SK); ls.del(LK); for (const k in memory) delete memory[k]; state = fresh(); },
     // العودة للبداية تمسح التقدم وتُبقي اختيار الجهاز والإعدادات
-    resetProgress() { state.done = []; state.attempts = {}; state.diag = {}; state.s4 = null; state.quiz = null; state.reviewReturn = false; persist(); },
+    resetProgress() { state.done = []; state.attempts = {}; state.diag = {}; state.s4 = null; state.quiz = null; state.reviewReturn = false; state.levelResults = {}; state.remedial = {}; state.counts = { remediation: 0, enrichment: 0 }; state.errors = {}; persist(); },
   };
 })();

@@ -1,0 +1,50 @@
+/* صفحات الحساب ولوحة المعلم والإدارة (11.0) */
+.portal-top { gap: 10px; }
+.portal-main { max-width: 980px; margin: 0 auto; padding: 12px 14px 40px; }
+.p-h1 { font-size: 1.35em; margin: 8px 0; }
+.p-card { margin: 0 0 14px; padding: 12px 14px; border: 2px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.p-card h2 { margin: 0 0 8px; font-size: 1.15em; }
+details.p-card > summary { font-weight: 700; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.p-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 8px 0; }
+.p-tabs button { min-height: 44px; border: 2px solid var(--line); border-radius: 10px; background: var(--bg); color: inherit; font: inherit; cursor: pointer; }
+.p-tabs button[aria-selected="true"] { border-color: var(--green); border-width: 3px; font-weight: 700; background: var(--green-soft); }
+.p-field { margin: 10px 0; }
+.p-field label { display: block; font-weight: 700; margin-bottom: 4px; }
+.p-field input, .p-field select, .p-field textarea { width: 100%; box-sizing: border-box; min-height: 44px; font: inherit; padding: 8px 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--bg); color: inherit; }
+.p-field input:focus-visible, .p-field select:focus-visible, .p-field textarea:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+.p-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; align-items: center; }
+.p-msg { margin: 8px 0; padding: 8px 12px; border-radius: 10px; font-weight: 700; }
+.p-msg.err { border: 2px solid var(--no); }
+.p-msg.ok { border: 2px solid var(--green); }
+.p-msg.warn { border: 2px dashed var(--info); }
+.p-list { list-style: none; padding: 0; margin: 6px 0; }
+.p-list > li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.p-list > li:last-child { border-bottom: 0; }
+.p-confirm { margin: 8px 0; padding: 10px 12px; border: 2px solid var(--no); border-radius: 12px; background: var(--bg); }
+.btn.danger { border-color: var(--no); }
+.code-big { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.35em; letter-spacing: .12em; font-weight: 700; }
+.code-card { border-color: var(--green); }
+.code-line { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.badge-st { display: inline-block; margin: 4px 0; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); font-weight: 700; }
+.task.st-done .badge-st { border-color: var(--green); }
+.task.st-done .badge-st::before { content: "✓ "; }
+.task.st-in_progress .badge-st::before { content: "◐ "; }
+.task.st-not_started .badge-st::before { content: "○ "; }
+.p-scroll { overflow-x: auto; }
+.p-table { border-collapse: collapse; width: 100%; font-size: .95em; }
+.p-table th, .p-table td { border: 1px solid var(--line); padding: 6px 8px; text-align: start; vertical-align: top; }
+.p-table thead th { background: var(--bg); }
+.link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--info); text-decoration: underline; cursor: pointer; min-height: 32px; }
+.p-bars { list-style: none; padding: 0; }
+.p-bars li { margin: 6px 0; }
+.bar { display: block; height: 10px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; margin-top: 4px; }
+.bar .fill { display: block; height: 100%; background: var(--green); width: 0; }
+.fill.w0{width:0}.fill.w10{width:10%}.fill.w20{width:20%}.fill.w30{width:30%}.fill.w40{width:40%}.fill.w50{width:50%}.fill.w60{width:60%}.fill.w70{width:70%}.fill.w80{width:80%}.fill.w90{width:90%}.fill.w100{width:100%}
+.student-report { border-color: var(--info); }
+@media (max-width: 400px) { .p-tabs { grid-template-columns: 1fr; } }
+/* 11.1: مراجعة الملاحظات */
+.fb-item select, .fb-item textarea, #fb-filter, #days { min-height: 44px; font: inherit; padding: 6px 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--bg); color: inherit; }
+.fb-item textarea { width: 100%; box-sizing: border-box; margin: 4px 0; }
+.fb-item label { display: block; margin-top: 6px; font-weight: 700; }
+.fb-text { padding: 8px 12px; border-radius: 10px; background: var(--bg); margin: 6px 0; white-space: pre-wrap; }
+.fb-kinds .check-row { min-height: 44px; }

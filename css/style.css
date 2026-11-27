@@ -471,3 +471,56 @@ html.contrast .gl-input, html.contrast .gl-item, html.contrast .shot { border-co
 .peer4 { margin: 10px 0; padding: 10px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); }
 .peer4 ol { margin: 6px 0; padding-inline-start: 22px; }
 .peer4 li { margin: 4px 0; }
+
+/* ═════ 11.0: المستويات والخطة العلاجية والنشاط التعاوني والدعم ═════ */
+.lvl-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 12px; }
+.lvl-label { font-weight: 700; color: var(--info); }
+.lvl-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; flex: 1 1 320px; }
+.lvl-btn { min-height: 44px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: inherit; font: inherit; padding: 6px 8px; display: flex; align-items: center; justify-content: center; gap: 6px; line-height: 1.25; text-align: center; cursor: pointer; }
+.lvl-btn[aria-pressed="true"] { border-color: var(--green); background: var(--green-soft); font-weight: 700; border-width: 3px; }
+.lvl-btn[aria-pressed="true"]::after { content: "✓"; }
+.lvl-num { display: inline-grid; place-items: center; min-width: 26px; height: 26px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); font-weight: 700; }
+.menu-lvl { grid-template-columns: minmax(0, 1fr); margin: 6px 0; }
+@media (max-width: 400px) { .lvl-seg { grid-template-columns: minmax(0, 1fr); } .lvl-bar { flex-direction: column; align-items: stretch; } }
+.lvl-box { margin: 0 0 14px; padding: 10px 14px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--card); }
+.lvl-box.l1 { border-color: var(--info); }
+.lvl-box.l3 { border-style: dashed; border-color: var(--green); }
+.lvl-box-title { margin: 0 0 4px; font-weight: 700; color: var(--info); }
+.think-q { font-weight: 700; margin: 4px 0; }
+.think-ans { margin: 8px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--bg); }
+.lvl-results ul { margin: 6px 0; padding-inline-start: 22px; }
+.lvl-quiz, .rem-plan, .lvl-results { margin: 16px 0; padding: 12px 14px; border: 2px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.mini { margin: 10px 0; }
+.mini-q legend { font-weight: 700; }
+.mini-img img { max-width: 100%; height: auto; border-radius: 10px; }
+.lq-summary .btn { margin: 6px 0 0 6px; }
+.rem-goal { margin: 10px 0; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); }
+.rem-goal h3 { margin: 0 0 6px; font-size: 1.02em; }
+.rem-goal ol { margin: 4px 0 8px; padding-inline-start: 22px; }
+.rem-goal.passed { border-color: var(--green); }
+.rem-ok { font-weight: 700; color: var(--green); margin: 8px 0 0; }
+.collab4 { margin: 12px 0; padding: 10px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--bg); }
+.collab4 summary { font-weight: 700; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.collab4 .roles { padding-inline-start: 18px; }
+.support-box { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+.support-box .warn { font-weight: 700; }
+.check-row { display: flex; gap: 8px; align-items: center; min-height: 44px; }
+.check-row input { width: 22px; height: 22px; }
+a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.mig-banner{margin:0 0 12px;padding:10px 12px;border:2px solid var(--info);border-radius:12px;background:var(--card)}
+
+/* 11.1: الدعم الفني ونموذج الملاحظات وصفحة المساعدة الذاتية */
+.fb-box { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+.fb-kinds { border: 0; padding: 0; margin: 6px 0; }
+.fb-kinds legend { font-weight: 700; margin-bottom: 4px; }
+.fb-kinds input { width: 22px; height: 22px; flex: none; }
+.fb-label { display: block; font-weight: 700; margin-top: 8px; }
+.fb-form textarea { width: 100%; box-sizing: border-box; min-height: 88px; font: inherit; padding: 8px 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--bg); color: inherit; }
+.fb-form textarea:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+.fb-msg { margin: 8px 0; padding: 8px 12px; border-radius: 10px; font-weight: 700; }
+.fb-msg.ok { border: 2px solid var(--green); }
+.fb-msg.err { border: 2px solid var(--no); }
+.email { font-family: ui-monospace, Menlo, Consolas, monospace; overflow-wrap: anywhere; user-select: all; }
+.sh-lang { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 16px; }
+.sh-section[lang="en"] { text-align: left; }
+.sh-section h2 { margin-top: 0; }

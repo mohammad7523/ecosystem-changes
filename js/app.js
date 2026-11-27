@@ -4,6 +4,8 @@
 (() => {
   const C = window.CONTENT;
   const S = window.Store;
+  // 11.0: نقاط ربط لوحدة الامتدادات (المستويات، الحسابات، الإحصاءات). بلا الوحدة لا يتغير شيء
+  const X = (k, ...a) => { try { return window.EcoExt && typeof window.EcoExt[k] === 'function' ? window.EcoExt[k](...a) : undefined; } catch (e) { console.error(e); return undefined; } };
   const $ = s => document.querySelector(s);
   const AR = '٠١٢٣٤٥٦٧٨٩';
   const ar = n => String(n).replace(/\d/g, d => AR[d]);
@@ -178,7 +180,7 @@
       stopAudio();
       player = new Audio(src);
       player.addEventListener('ended', () => setUi(false));
-      player.addEventListener('error', () => { setUi(false); statusEl.textContent = C.alerts.audioFail; });
+      player.addEventListener('error', () => { setUi(false); statusEl.textContent = C.alerts.audioFail; X('event', 'media_error', 0, src.split('/').pop()); });
       statusEl.textContent = '';
       player.play().then(() => setUi(true)).catch(() => { setUi(false); statusEl.textContent = C.alerts.audioFail; });
     });
@@ -301,6 +303,7 @@
         // الإثراء عند الإتقان فقط: الإجابة الأولى في الجلسة صحيحة (القرار ٤)، لا بعد خطأ أو إعادة تدريب
         const mastered = S.get().diag[cfg.screen]?.correct === true && wrongs === 0;
         showFeedback('correct', cfg.feedback.correct, mastered && cfg.enrichment ? cfg.enrichment() : null);
+        if (mastered && cfg.enrichment) X('event', 'enrichment', cfg.screen);
         complete();
       } else {
         wrongs++; tried.add(i);
@@ -308,7 +311,14 @@
         const noWrongLeft = tried.size >= wrongTotal;
         if (wrongs >= 3 || (wrongs >= 2 && noWrongLeft)) reveal();
         else if (wrongs === 2) { if (cfg.showReview) cfg.showReview(true); showFeedback('wrong', cfg.feedback.wrong2, cfg.reviewButton ? cfg.reviewButton() : null); }
-        else showFeedback('wrong', cfg.options[i].hint || cfg.feedback.wrong1); // 10.6: تلميح بحسب الخيار الخاطئ نفسه
+        else {
+          // 11.0: دعم التلميح بحسب المستوى — ١ مدعوم (التلميح مع المراجعة المصورة)، ٢ المعتاد، ٣ تلميح عام يترك التفكير للطالب
+          const mode = X('hintMode', cfg.screen) || 'standard';
+          if (mode === 'minimal') showFeedback('wrong', C.levels.minimalHint);
+          else if (mode === 'supported' && cfg.showReview) { cfg.showReview(true); showFeedback('wrong', cfg.options[i].hint || cfg.feedback.wrong1, cfg.reviewButton ? cfg.reviewButton() : null); }
+          else showFeedback('wrong', cfg.options[i].hint || cfg.feedback.wrong1); // 10.6: تلميح بحسب الخيار الخاطئ نفسه
+          X('error', 's' + cfg.screen);
+        }
       }
       setTimeout(() => { busy = false; optBtns.forEach(x => x.removeAttribute('aria-busy')); }, 350);
     }
@@ -416,6 +426,7 @@
     vid.addEventListener('pause', () => setPlayUi(false));
     vid.addEventListener('ended', () => setPlayUi(false));
     vid.addEventListener('error', () => {
+      X('event', 'media_error', current, String(v.src || '').split('/').pop());
       // يبقى الدرس ممكنًا: الصورتان أسفل الفيديو، والنص المكتوب يظهر تلقائيًا
       fail.hidden = false; box.classList.add('failed'); transcript.hidden = false; trBtn.setAttribute('aria-expanded', 'true'); setPlayUi(false);
     });
@@ -481,7 +492,9 @@
         if (k === card.answer) { mark(b, 'is-right'); show('correct', fillT(sc.feedback.correct, card)); resolve(); }
         else {
           wrongs++; mark(b, 'is-wrong');
-          if (wrongs === 1) show('wrong', (k === 'natural' ? sc.feedback.wrongAsNatural : sc.feedback.wrongAsHuman) || sc.feedback.wrong1); // 10.6: بحسب اتجاه الخطأ
+          const mode3 = X('hintMode', 3) || 'standard'; X('error', 's3');
+          const dir = (k === 'natural' ? sc.feedback.wrongAsNatural : sc.feedback.wrongAsHuman) || sc.feedback.wrong1; // 10.6: بحسب اتجاه الخطأ
+          if (wrongs === 1) show('wrong', mode3 === 'minimal' ? C.levels.minimalHint : mode3 === 'supported' ? dir + ' ' + sc.feedback.wrong2 : dir); // 11.0: بحسب المستوى
           else if (wrongs === 2) show('wrong', sc.feedback.wrong2);
           else {
             mark(btns.find(x => x.dataset.k === card.answer), 'is-right');
@@ -520,7 +533,7 @@
         el('p', { class: 'fb-head' }, icon('ok'), el('b', { text: C.marks.correct })), el('p', { text: sc.feedback.complete })));
       // الإثراء: فقط إذا كانت الإجابة الأولى للصور الأربع كلها صحيحة (القرار ٤)
       const d = S.get().diag[3] || {};
-      if (!enrichShown && sc.cards.every(c => d[c.id] && d[c.id].correct)) { enrichShown = true; summary.append(enrichment3()); }
+      if (!enrichShown && sc.cards.every(c => d[c.id] && d[c.id].correct)) { enrichShown = true; summary.append(enrichment3()); X('event', 'enrichment', 3); }
       summary.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function enrichment3() {
@@ -815,6 +828,7 @@
         if (score === 4) s.quiz.badge = true;                                      // الشارة عند ٤/٤ في أي محاولة
         if (first && !s.done.includes(6)) s.done.push(6);
       });
+      X('quizDone', score, first);
       renderProgress(6);
       draw();
     }
@@ -874,6 +888,7 @@
             }))));
         }
       }
+      X('result', body, last, isRetake, sc.questions.map(q => isRight(q, last.answers[q.id])));
       body.append(el('p', { class: 'small retake-note', text: sc.retakeNote }),
         el('div', { class: 'actions6' },
           el('button', { type: 'button', class: 'btn primary', text: sc.buttons.retake, onclick: () => {
@@ -910,6 +925,7 @@
         el('span', { text: sc.title }),
         st.done.includes(sc.id) ? el('span', { class: 'sr-only', text: fill(C.site.screenDone, { n: sc.id }) }) : null)))));
 
+    X('menu', box);
     box.append(el('h3', { text: M.settings }));
     const seg = (cfg, key, vals = [false, true]) => {
       const [label, a, b] = cfg;
@@ -1087,6 +1103,7 @@
   function help() {
     const H = C.help, sc = C.screens[current - 1];
     const box = panelBox(C.buttons.help);
+    X('event', 'help_open', current);
     if (sc.help) box.append(el('p', { class: 'help-now', text: sc.help }));
     box.append(el('h3', { text: H.stepsTitle }), el('ol', { class: 'steps' }, H.steps.map(s => el('li', { text: s }))));
     // فيديو المساعدة VID-02
@@ -1096,6 +1113,7 @@
       el('figure', { class: 'shot' }, el('img', { src: s.src, alt: s.caption, width: s.width, height: s.height, loading: 'lazy', decoding: 'async' }), el('figcaption', { text: s.caption })))));
     box.append(el('h3', { text: H.faqTitle }), ...H.faq.map(([q, a]) => el('details', { class: 'faq' }, el('summary', { text: q }), el('p', { text: a }))));
     box.append(el('h3', { text: H.brokenTitle }), el('ol', {}, H.broken.map(s => el('li', { text: s }))), el('p', { class: 'small', text: H.contact }));
+    X('help', box, current);
     openLayer(box, { label: C.buttons.help, onEscape: () => closeLayer(), panel: true });
   }
 
@@ -1135,6 +1153,7 @@
       main.append(el('button', { type: 'button', class: 'btn back6', onclick: () => go(6) }, el('span', { 'aria-hidden': 'true', text: '→' }), el('span', { text: C.screens[5].backToResult })));
     }
     main.append((SCREENS[current] || screenLater)(sc));
+    X('screen', current, main);
     renderProgress(current);
     document.title = sc.title + ' — ' + C.site.title;
     $('#btn-prev').disabled = current === 1;
@@ -1189,6 +1208,8 @@
     if (needs) confirmBox(C.alerts.leaveIncomplete, next, 'go', 'stay'); else next();
   });
   $('#btn-home').addEventListener('click', () => confirmBox(C.alerts.home, () => { S.resetProgress(); go(1); }));
+  // 11.0: أدوات الواجهة لوحدة الامتدادات
+  window.EcoApp = { el, icon, pic, fill, ar, go, toast, confirmBox, openLayer, closeLayer, panelBox, render: () => render(), current: () => current };
   window.addEventListener('hashchange', onHash);
 
   S.load();
